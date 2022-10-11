@@ -1,0 +1,46 @@
+{
+  "name": "udn_aws_to_dnanexus_copy",
+  "title": "udn_aws_to_dnanexus_copy",
+  "summary": "udn_aws_to_dnanexus_copy",
+  "dxapi": "1.0.0",
+  "version": "0.3.0",
+  "inputSpec": [
+    {
+      "name": "udn_id_list",
+      "class": "file",
+      "optional": false,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    }
+  ],
+  "outputSpec": [],
+  "runSpec": {
+    "timeoutPolicy": {
+      "*": {
+        "hours": 48
+      }
+    },
+    "interpreter": "bash",
+    "release": "20.04",
+    "version": "0",
+    "distribution": "Ubuntu",
+    "file": "src/udn_aws_to_dnanexus_copy.sh"
+  },
+  "access": {
+    "project": "CONTRIBUTE",
+    "network": [
+      "*"
+    ]
+  },
+  "regionalOptions": {
+    "aws:us-east-1": {
+      "systemRequirements": {
+        "*": {
+          "instanceType": "mem1_ssd1_x2"
+        }
+      }
+    }
+  }
+}

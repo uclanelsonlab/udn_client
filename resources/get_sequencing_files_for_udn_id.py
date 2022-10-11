@@ -10,7 +10,7 @@ args = parser.parse_args()
 with open(args.api_token_file) as f:
   token = f.readline().strip()
 
-url = 'https://gateway.undiagnosed.hms.harvard.edu/api/sequences/' + args.udn_id + '/'
+url = 'https://gateway.undiagnosed.hms.harvard.edu/api/2.0/participants/' + args.udn_id + '/sequencing'
 
 headers = {
   'Content-Type': 'application/json',
@@ -24,16 +24,11 @@ response = requests.request('GET', url, headers=headers)
 
 data = json.loads(response.text)
 
-for sequencing_request in data:
-  for sequencing_file in sequencing_request['sequencingfiles']:
-    if not 'locations' in sequencing_file['file_data']:
-      print(sequencing_file)
-      continue
-    locations_list = sequencing_file['file_data']['locations']
-    for location in locations_list:
-      if 'url' in location:
-        print(location['url'])
-      else:
-        pass
+for sequencing_request in data['requests']:
+  for sequencing_file in sequencing_request['files']:
+    if sequencing_file['storageType'] == 'standard':
+      print(sequencing_file['storageLocation'])
+    else:
+      pass
         # if you want to list manually which files are archived, uncomment the next line
-        # print('Our site requires access to this file: {} uuid: {} requested by mlwang@mednet.ucla.edu'.format(sequencing_file['filename'], sequencing_file['uuid']))
+        # print(sequencing_file['storageLocation'])

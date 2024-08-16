@@ -41,9 +41,9 @@ def main(args):
     for sequencing_request in sequencing_data['requests']:
         for sequencing_file in sequencing_request['files']:
             # Only files in s3
-            if sequencing_file['storageType'].startswith("standard"):
+            if sequencing_file['storageType'].lower().startswith("standard"):
                 files_id_lst.append(sequencing_file["id"])
-
+    print("Number of files to download: ", len(files_id_lst))
     # Download each file available
     for file_id in files_id_lst:
         url_files = f"https://gateway.undiagnosed.hms.harvard.edu/api/2.0/participants/{udn_id}/sequencing/files/{file_id}"

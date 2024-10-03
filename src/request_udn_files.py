@@ -8,10 +8,10 @@ import argparse
 from subprocess import call
 
 
-def curl_file(download_link, file_name, ):
+def curl_file(download_link, path_file):
     """ Curl command to download file """
-    cmd = f"curl '{download_link}' -o '{file_name}'"
-    print("# Downloading ", file_name)
+    cmd = f"curl '{download_link}' -o '{path_file}'"
+    print("# Downloading ", path_file)
     print(cmd)
     call(cmd, shell=1)
 
@@ -29,9 +29,11 @@ def main(args):
     """ Args function to run downsampled """
     api_token_file = os.path.abspath(args.api_token_file)
     udn_id = str(args.udn_id)
+    output_path = os.path.dirname(os.path.abspath(args.path))
     # Check prefix
     print(api_token_file)
     print(udn_id)
+    print(output_path)
     # Get files ID available for download
     with open(api_token_file) as f:
         token = f.readline().strip()
@@ -51,7 +53,8 @@ def main(args):
         try:
             download_link = files_data["downloadLink"]
             file_name = files_data["filename"]
-            curl_file(download_link, file_name)
+            path_file = os.path.join(output_path, file_name)
+            curl_file(download_link, path_file)
         except KeyError as e:
             print(f"# ERROR: Tried to download file ID {file_id}: {e}")
             print(files_data)
@@ -64,6 +67,7 @@ if __name__ == "__main__":
         python src/request_udn_files.py -a file-GX6P76j02k8Q5f0QgBV90By0 -u UDN970218 ''')
     parser.add_argument("-u", "--udn_id", help="UDN participan ID to download data", type=str)
     parser.add_argument("-a", "--api_token_file", help="API token file", type=str)
+    parser.add_argument("-p", "--path", help="Path for the output download", type=str, default=os.path.abspath(__file__))
     parser.set_defaults(func=main)
     if len(sys.argv) == 1:
         parser.print_help()

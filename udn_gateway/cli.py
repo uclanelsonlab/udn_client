@@ -227,7 +227,7 @@ Examples:
                 logger.info('Downloading .gvcf.gz files...')
                 def gvcf_filter(fileinfo):
                     return fileinfo.get('filename', '').endswith('.gvcf.gz')
-                downloaded_files = download_participant_files(client, udn_id, output_dir, file_types, file_filter=gvcf_filter)
+                downloaded_files = download_participant_files(client, udn_id, output_dir, args.file_types, file_filter=gvcf_filter)
                 
                 if downloaded_files:
                     logger.info(f"Successfully downloaded {len(downloaded_files)} .gvcf.gz file(s)")
@@ -243,7 +243,7 @@ Examples:
     # If --download is set without --gvcf, download all files
     elif args.download:
         logger.info('Downloading all available files...')
-        downloaded_files = download_participant_files(client, udn_id, output_dir, file_types)
+        downloaded_files = download_participant_files(client, udn_id, output_dir, args.file_types)
         
         if downloaded_files:
             logger.info(f"Downloaded {len(downloaded_files)} files to {output_dir}")

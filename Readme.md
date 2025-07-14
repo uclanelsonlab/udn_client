@@ -13,6 +13,11 @@ udn_aws_to_dnanexus_copy/
 │   ├── client.py            # API client implementation
 │   ├── cli.py               # Command-line interface
 │   └── utils.py             # Utility functions
+├── tests/                    # Test suite
+│   ├── __init__.py          # Test package initialization
+│   ├── test_sequencing.py   # Sequencing data structure tests
+│   ├── test_cli.py          # CLI functionality tests
+│   └── run_tests.py         # Test runner
 ├── udn_gateway_cli.py       # Main CLI entry point
 ├── setup.py                 # Package installation
 ├── requirements.txt          # Dependencies
@@ -41,6 +46,28 @@ pip install .
 ```
 
 ### Option 2: Use Directly
+
+## Testing
+
+The project includes a comprehensive test suite to ensure functionality works correctly:
+
+```bash
+# Run all tests
+python tests/run_tests.py
+
+# Run specific test categories
+python tests/run_tests.py sequencing
+python tests/run_tests.py cli
+
+# Run individual test files
+python tests/test_sequencing.py
+python tests/test_cli.py
+```
+
+### Test Categories
+
+- **sequencing**: Tests API data structure parsing and file detection
+- **cli**: Tests command-line interface functionality and flags
 
 ### Prerequisites
 

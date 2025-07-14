@@ -252,22 +252,32 @@ class UDNGatewayClient:
         """
         all_files = []
         
+        # Get sequencing files
         try:
-            # Get sequencing files
             sequencing_data = self.get_participant_sequencing(udn_id)
-            if 'sequencing_files' in sequencing_data:
-                for file_info in sequencing_data['sequencing_files']:
-                    file_info['source'] = 'sequencing'
-                    all_files.append(file_info)
-            
-            # Get medical records
+            if 'requests' in sequencing_data:
+                for request in sequencing_data['requests']:
+                    if 'files' in request:
+                        for file_info in request['files']:
+                            file_info['source'] = 'sequencing'
+                            all_files.append(file_info)
+            logger.debug(f"Found {len([f for f in all_files if f['source'] == 'sequencing'])} sequencing files")
+        except Exception as e:
+            logger.debug(f"Could not get sequencing files for {udn_id}: {e}")
+        
+        # Get medical records
+        try:
             medical_data = self.get_participant_medical_records(udn_id)
             if 'medical_records' in medical_data:
                 for file_info in medical_data['medical_records']:
                     file_info['source'] = 'medical_record'
                     all_files.append(file_info)
-            
-            # Get consents
+            logger.debug(f"Found {len([f for f in all_files if f['source'] == 'medical_record'])} medical record files")
+        except Exception as e:
+            logger.debug(f"Could not get medical records for {udn_id}: {e}")
+        
+        # Get consents
+        try:
             consents_data = self.get_participant_consents(udn_id)
             if 'consents' in consents_data:
                 for consent in consents_data['consents']:
@@ -275,15 +285,19 @@ class UDNGatewayClient:
                         for file_info in consent['documents']:
                             file_info['source'] = 'consent'
                             all_files.append(file_info)
-            
-            # Get wrapup documents
+            logger.debug(f"Found {len([f for f in all_files if f['source'] == 'consent'])} consent files")
+        except Exception as e:
+            logger.debug(f"Could not get consent files for {udn_id}: {e}")
+        
+        # Get wrapup documents
+        try:
             wrapup_data = self.get_participant_wrapup_documents(udn_id)
             if 'wrapup_documents' in wrapup_data:
                 for file_info in wrapup_data['wrapup_documents']:
                     file_info['source'] = 'wrapup_document'
                     all_files.append(file_info)
-                    
+            logger.debug(f"Found {len([f for f in all_files if f['source'] == 'wrapup_document'])} wrapup document files")
         except Exception as e:
-            logger.error(f"Error getting files for {udn_id}: {e}")
+            logger.debug(f"Could not get wrapup documents for {udn_id}: {e}")
         
         return all_files 

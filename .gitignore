@@ -1,2 +1,4 @@
 Documentation-for-the-UDN-Gateway-API.html
 api-key.txt
+*/*/*.pyc
+udn_gateway/__pycache__/*.pyc

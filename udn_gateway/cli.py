@@ -107,6 +107,9 @@ Examples:
   # Download all files
   python -m udn_gateway.cli -a api-key.txt -u UDN287643 --download
   
+  # Check for .gvcf.gz files
+  python -m udn_gateway.cli -a api-key.txt -u UDN287643 --gvcf
+  
   # Download only .gvcf.gz files
   python -m udn_gateway.cli -a api-key.txt -u UDN287643 --download --gvcf
   
@@ -131,7 +134,7 @@ Examples:
     parser.add_argument('--download', action='store_true', 
                        help='Download files for the participant (must be explicitly set)')
     parser.add_argument('--gvcf', action='store_true', 
-                       help='Only download files ending with .gvcf.gz (must be used with --download)')
+                       help='Check for .gvcf.gz files. Use with --download to download them.')
     parser.add_argument("--verbose", 
                        help="Enable verbose logging", 
                        action="store_true")
@@ -204,27 +207,52 @@ Examples:
         logger.info('Info-only mode: not downloading any files.')
         return
     
-    # If --download is not set, warn and exit
-    if not args.download:
-        logger.warning('No action taken. Use --download to download files, or --info-only to print info.')
-        return
-    
-    # If --download is set, proceed to download files
-    # If --gvcf is set, filter files to only .gvcf.gz
-    file_types = args.file_types
-    
+    # Handle --gvcf flag (can work independently or with --download)
     if args.gvcf:
-        logger.info('Filtering to only .gvcf.gz files for download.')
-        def gvcf_filter(fileinfo):
-            return fileinfo.get('filename', '').endswith('.gvcf.gz')
-        downloaded_files = download_participant_files(client, udn_id, output_dir, file_types, file_filter=gvcf_filter)
-    else:
-        downloaded_files = download_participant_files(client, udn_id, output_dir, file_types)
+        logger.info('Checking for .gvcf.gz files...')
+        
+        # Get all files and filter for .gvcf.gz
+        files = client.get_all_participant_files(udn_id)
+        gvcf_files = [f for f in files if f.get('filename', '').endswith('.gvcf.gz')]
+        
+        if gvcf_files:
+            logger.info(f"Found {len(gvcf_files)} .gvcf.gz file(s) available:")
+            for file_info in gvcf_files:
+                filename = file_info.get('filename', 'unknown')
+                source = file_info.get('source', 'unknown')
+                logger.info(f"  - {filename} (source: {source})")
+            
+            # If --download is also specified, download the files
+            if args.download:
+                logger.info('Downloading .gvcf.gz files...')
+                def gvcf_filter(fileinfo):
+                    return fileinfo.get('filename', '').endswith('.gvcf.gz')
+                downloaded_files = download_participant_files(client, udn_id, output_dir, file_types, file_filter=gvcf_filter)
+                
+                if downloaded_files:
+                    logger.info(f"Successfully downloaded {len(downloaded_files)} .gvcf.gz file(s)")
+                else:
+                    logger.warning("No .gvcf.gz files were downloaded")
+            else:
+                logger.info('Use --download with --gvcf to download the .gvcf.gz files')
+        else:
+            logger.warning("No .gvcf.gz files found for this participant")
+            if args.download:
+                logger.info('No .gvcf.gz files to download')
     
-    if downloaded_files:
-        logger.info(f"Downloaded {len(downloaded_files)} files to {output_dir}")
+    # If --download is set without --gvcf, download all files
+    elif args.download:
+        logger.info('Downloading all available files...')
+        downloaded_files = download_participant_files(client, udn_id, output_dir, file_types)
+        
+        if downloaded_files:
+            logger.info(f"Downloaded {len(downloaded_files)} files to {output_dir}")
+        else:
+            logger.warning("No files were downloaded")
+    
+    # If neither --download nor --gvcf is set, warn and exit
     else:
-        logger.warning("No files were downloaded")
+        logger.warning('No action taken. Use --download to download all files, --gvcf to check for .gvcf.gz files, or --info-only to print info.')
 
 
 if __name__ == "__main__":

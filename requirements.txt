@@ -1,0 +1,17 @@
+# UDN Gateway API Client Dependencies
+# Python 3.6+ required
+
+# HTTP requests library for API calls
+requests>=2.25.0
+
+# Optional: For better JSON handling and validation
+# jsonschema>=3.2.0
+
+# Optional: For advanced logging configuration
+# python-json-logger>=2.0.0
+
+# Optional: For progress bars during downloads
+# tqdm>=4.60.0
+
+# Optional: For configuration management
+# python-dotenv>=0.19.0 

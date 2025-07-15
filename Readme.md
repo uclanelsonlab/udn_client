@@ -103,6 +103,9 @@ python udn_gateway_cli.py -a token.txt -u UDN970218 --download
 # Download only .gvcf.gz files
 python udn_gateway_cli.py -a token.txt -u UDN970218 --download --gvcf
 
+# Download only .vcf.gz files
+python udn_gateway_cli.py -a token.txt -u UDN970218 --download --vcf
+
 # Download files to a specific directory
 python udn_gateway_cli.py -a token.txt -u UDN970218 --download -o /path/to/output
 
@@ -156,6 +159,7 @@ python udn_gateway_cli.py [OPTIONS]
 - `--info-only`: Only get participant information, don't download files
 - `--download`: Download files for the participant (must be explicitly set)
 - `--gvcf`: Only download files ending with .gvcf.gz (must be used with --download)
+- `--vcf`: Only download files ending with .vcf.gz (must be used with --download)
 - `--verbose`: Enable verbose logging
 
 #### Examples
@@ -166,6 +170,9 @@ python udn_gateway_cli.py -a token.txt -u UDN970218 --download
 
 # Download only .gvcf.gz files
 python udn_gateway_cli.py -a token.txt -u UDN970218 --download --gvcf
+
+# Download only .vcf.gz files
+python udn_gateway_cli.py -a token.txt -u UDN970218 --download --vcf
 
 # Download only sequencing files
 python udn_gateway_cli.py -a token.txt -u UDN970218 --download --file-types sequencing_file

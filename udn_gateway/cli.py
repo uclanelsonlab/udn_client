@@ -14,6 +14,7 @@ from typing import List, Optional, Callable
 import logging
 
 from .client import UDNGatewayClient, UDNGatewayAPIError
+from .utils import filter_gvcf_files, filter_vcf_files
 
 # Set up logging
 logging.basicConfig(
@@ -113,6 +114,12 @@ Examples:
   # Download only .gvcf.gz files
   python -m udn_gateway.cli -a api-key.txt -u UDN287643 --download --gvcf
   
+  # Check for .vcf.gz files
+  python -m udn_gateway.cli -a api-key.txt -u UDN287643 --vcf
+  
+  # Download only .vcf.gz files
+  python -m udn_gateway.cli -a api-key.txt -u UDN287643 --download --vcf
+  
   # List all participants
   python -m udn_gateway.cli -a api-key.txt --list-participants
         """
@@ -135,6 +142,8 @@ Examples:
                        help='Download files for the participant (must be explicitly set)')
     parser.add_argument('--gvcf', action='store_true', 
                        help='Check for .gvcf.gz files. Use with --download to download them.')
+    parser.add_argument('--vcf', action='store_true', 
+                       help='Check for .vcf.gz files. Use with --download to download them.')
     parser.add_argument("--verbose", 
                        help="Enable verbose logging", 
                        action="store_true")
@@ -213,7 +222,7 @@ Examples:
         
         # Get all files and filter for .gvcf.gz
         files = client.get_all_participant_files(udn_id)
-        gvcf_files = [f for f in files if f.get('filename', '').endswith('.gvcf.gz')]
+        gvcf_files = filter_gvcf_files(files)
         
         if gvcf_files:
             logger.info(f"Found {len(gvcf_files)} .gvcf.gz file(s) available:")
@@ -240,7 +249,40 @@ Examples:
             if args.download:
                 logger.info('No .gvcf.gz files to download')
     
-    # If --download is set without --gvcf, download all files
+    # Handle --vcf flag (can work independently or with --download)
+    if args.vcf:
+        logger.info('Checking for .vcf.gz files...')
+        
+        # Get all files and filter for .vcf.gz
+        files = client.get_all_participant_files(udn_id)
+        vcf_files = filter_vcf_files(files)
+        
+        if vcf_files:
+            logger.info(f"Found {len(vcf_files)} .vcf.gz file(s) available:")
+            for file_info in vcf_files:
+                filename = file_info.get('filename', 'unknown')
+                source = file_info.get('source', 'unknown')
+                logger.info(f"  - {filename} (source: {source})")
+            
+            # If --download is also specified, download the files
+            if args.download:
+                logger.info('Downloading .vcf.gz files...')
+                def vcf_filter(fileinfo):
+                    return fileinfo.get('filename', '').endswith('.vcf.gz')
+                downloaded_files = download_participant_files(client, udn_id, output_dir, args.file_types, file_filter=vcf_filter)
+                
+                if downloaded_files:
+                    logger.info(f"Successfully downloaded {len(downloaded_files)} .vcf.gz file(s)")
+                else:
+                    logger.warning("No .vcf.gz files were downloaded")
+            else:
+                logger.info('Use --download with --vcf to download the .vcf.gz files')
+        else:
+            logger.warning("No .vcf.gz files found for this participant")
+            if args.download:
+                logger.info('No .vcf.gz files to download')
+    
+    # If --download is set without --gvcf or --vcf, download all files
     elif args.download:
         logger.info('Downloading all available files...')
         downloaded_files = download_participant_files(client, udn_id, output_dir, args.file_types)
@@ -250,9 +292,9 @@ Examples:
         else:
             logger.warning("No files were downloaded")
     
-    # If neither --download nor --gvcf is set, warn and exit
+    # If neither --download nor --gvcf nor --vcf is set, warn and exit
     else:
-        logger.warning('No action taken. Use --download to download all files, --gvcf to check for .gvcf.gz files, or --info-only to print info.')
+        logger.warning('No action taken. Use --download to download all files, --gvcf to check for .gvcf.gz files, --vcf to check for .vcf.gz files, or --info-only to print info.')
 
 
 if __name__ == "__main__":

@@ -130,6 +130,32 @@ def filter_files_by_extension(files: List[Dict[str, Any]], extension: str) -> Li
     return [f for f in files if f.get('filename', '').endswith(extension)]
 
 
+def filter_gvcf_files(files: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Filter files to only include .gvcf.gz files.
+    
+    Args:
+        files (list): List of file dictionaries
+        
+    Returns:
+        list: Filtered list containing only .gvcf.gz files
+    """
+    return filter_files_by_extension(files, '.gvcf.gz')
+
+
+def filter_vcf_files(files: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Filter files to only include .vcf.gz files.
+    
+    Args:
+        files (list): List of file dictionaries
+        
+    Returns:
+        list: Filtered list containing only .vcf.gz files
+    """
+    return filter_files_by_extension(files, '.vcf.gz')
+
+
 def get_file_info_summary(files: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Get a summary of file information.

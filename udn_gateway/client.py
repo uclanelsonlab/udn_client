@@ -148,6 +148,19 @@ class UDNGatewayClient:
         """
         return self._make_request('GET', f'/participants/{udn_id}/sequencing')
     
+    def get_participant_sequencing_file_details(self, udn_id: str, file_id: int) -> Dict[str, Any]:
+        """
+        Get details of a specific sequencing file including download link.
+        
+        Args:
+            udn_id (str): The UDN ID of the participant
+            file_id (int): The ID of the sequencing file
+            
+        Returns:
+            dict: File details including download link
+        """
+        return self._make_request('GET', f'/participants/{udn_id}/sequencing/files/{file_id}')
+    
     def get_participant_medical_records(self, udn_id: str) -> Dict[str, Any]:
         """
         Get medical records for a specific participant.
@@ -260,6 +273,19 @@ class UDNGatewayClient:
                     if 'files' in request:
                         for file_info in request['files']:
                             file_info['source'] = 'sequencing'
+                            # Try to get download URL for sequencing files
+                            try:
+                                file_id = file_info.get('id')
+                                if file_id:
+                                    file_details = self.get_participant_sequencing_file_details(udn_id, file_id)
+                                    if 'url' in file_details:
+                                        file_info['url'] = file_details['url']
+                                    elif 'downloadUrl' in file_details:
+                                        file_info['url'] = file_details['downloadUrl']
+                                    elif 'downloadLink' in file_details:
+                                        file_info['url'] = file_details['downloadLink']
+                            except Exception as e:
+                                logger.debug(f"Could not get download URL for file {file_info.get('filename', 'unknown')}: {e}")
                             all_files.append(file_info)
             logger.debug(f"Found {len([f for f in all_files if f['source'] == 'sequencing'])} sequencing files")
         except Exception as e:

@@ -245,9 +245,13 @@ Examples:
             else:
                 logger.info('Use --download with --gvcf to download the .gvcf.gz files')
         else:
-            logger.warning("No .gvcf.gz files found for this participant")
+            logger.error("No .gvcf.gz files found for this participant")
             if args.download:
-                logger.info('No .gvcf.gz files to download')
+                logger.error("Cannot download .gvcf.gz files: none found")
+                sys.exit(1)
+            else:
+                sys.exit(1)
+        return  # Exit after handling GVCF
     
     # Handle --vcf flag (can work independently or with --download)
     if args.vcf:
@@ -278,12 +282,16 @@ Examples:
             else:
                 logger.info('Use --download with --vcf to download the .vcf.gz files')
         else:
-            logger.warning("No .vcf.gz files found for this participant")
+            logger.error("No .vcf.gz files found for this participant")
             if args.download:
-                logger.info('No .vcf.gz files to download')
+                logger.error("Cannot download .vcf.gz files: none found")
+                sys.exit(1)
+            else:
+                sys.exit(1)
+        return  # Exit after handling VCF
     
     # If --download is set without --gvcf or --vcf, download all files
-    elif args.download:
+    if args.download:
         logger.info('Downloading all available files...')
         downloaded_files = download_participant_files(client, udn_id, output_dir, args.file_types)
         
@@ -292,8 +300,8 @@ Examples:
         else:
             logger.warning("No files were downloaded")
     
-    # If neither --download nor --gvcf nor --vcf is set, warn and exit
-    else:
+    # If no action flags are set, warn and exit
+    if not args.download and not args.gvcf and not args.vcf:
         logger.warning('No action taken. Use --download to download all files, --gvcf to check for .gvcf.gz files, --vcf to check for .vcf.gz files, or --info-only to print info.')
 
 

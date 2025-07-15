@@ -233,6 +233,12 @@ class UDNGatewayClient:
             bool: True if download successful, False otherwise
         """
         try:
+            # Create output directory if it doesn't exist
+            output_dir = os.path.dirname(output_path)
+            if output_dir and not os.path.exists(output_dir):
+                os.makedirs(output_dir, exist_ok=True)
+                logger.debug(f"Created output directory: {output_dir}")
+            
             # Use curl for downloads as it handles large files better
             import subprocess
             result = subprocess.run([

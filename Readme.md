@@ -97,7 +97,10 @@ pip install requests
 #### Using the Enhanced Script (Recommended)
 
 ```bash
-# Download all files for a participant
+# Download all files for a participant (new simplified way)
+python udn_gateway_cli.py -a token.txt -u UDN970218 --all
+
+# Download all files for a participant (legacy way)
 python udn_gateway_cli.py -a token.txt -u UDN970218 --download
 
 # Download only .gvcf.gz files
@@ -107,7 +110,7 @@ python udn_gateway_cli.py -a token.txt -u UDN970218 --download --gvcf
 python udn_gateway_cli.py -a token.txt -u UDN970218 --download --vcf
 
 # Download files to a specific directory
-python udn_gateway_cli.py -a token.txt -u UDN970218 --download -o /path/to/output
+python udn_gateway_cli.py -a token.txt -u UDN970218 --all -o /path/to/output
 
 # List all available participants
 python udn_gateway_cli.py -a token.txt --list-participants
@@ -157,7 +160,8 @@ python udn_gateway_cli.py [OPTIONS]
 - `--file-types`: File types to download (comma-separated: sequencing_file,medical_record,etc.)
 - `--list-participants`: List all available participants
 - `--info-only`: Only get participant information, don't download files
-- `--download`: Download files for the participant (must be explicitly set)
+- `--all`: Download all available files for the participant (new simplified way)
+- `--download`: Download files for the participant (legacy way, must be explicitly set)
 - `--gvcf`: Only download files ending with .gvcf.gz (must be used with --download)
 - `--vcf`: Only download files ending with .vcf.gz (must be used with --download)
 - `--verbose`: Enable verbose logging
@@ -165,7 +169,10 @@ python udn_gateway_cli.py [OPTIONS]
 #### Examples
 
 ```bash
-# Download all files for a participant
+# Download all files for a participant (new simplified way)
+python udn_gateway_cli.py -a token.txt -u UDN970218 --all
+
+# Download all files for a participant (legacy way)
 python udn_gateway_cli.py -a token.txt -u UDN970218 --download
 
 # Download only .gvcf.gz files
@@ -175,10 +182,10 @@ python udn_gateway_cli.py -a token.txt -u UDN970218 --download --gvcf
 python udn_gateway_cli.py -a token.txt -u UDN970218 --download --vcf
 
 # Download only sequencing files
-python udn_gateway_cli.py -a token.txt -u UDN970218 --download --file-types sequencing_file
+python udn_gateway_cli.py -a token.txt -u UDN970218 --all --file-types sequencing_file
 
 # Download files to a specific directory
-python udn_gateway_cli.py -a token.txt -u UDN970218 --download -o /path/to/output
+python udn_gateway_cli.py -a token.txt -u UDN970218 --all -o /path/to/output
 
 # List all available participants
 python udn_gateway_cli.py -a token.txt --list-participants
@@ -187,7 +194,7 @@ python udn_gateway_cli.py -a token.txt --list-participants
 python udn_gateway_cli.py -a token.txt -u UDN970218 --info-only
 
 # Enable verbose logging
-python udn_gateway_cli.py -a token.txt -u UDN970218 --download --verbose
+python udn_gateway_cli.py -a token.txt -u UDN970218 --all --verbose
 ```
 
 ### API Client Usage
@@ -450,6 +457,11 @@ For issues related to:
 - Documentation: Submit a pull request with improvements
 
 ## Changelog
+
+### Version 2.1.0
+- Added `--all` parameter for simplified downloading of all available files
+- Enhanced CLI usability with more intuitive download options
+- Maintained backward compatibility with existing `--download` parameter
 
 ### Version 2.0.0
 - Added comprehensive UDN Gateway API client

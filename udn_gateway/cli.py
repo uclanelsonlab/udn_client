@@ -105,7 +105,10 @@ Examples:
   # Get participant info only
   python -m udn_gateway.cli -a api-key.txt -u UDN287643 --info-only
   
-  # Download all files
+  # Download all files (new simplified way)
+  python -m udn_gateway.cli -a api-key.txt -u UDN287643 --all
+  
+  # Download all files (legacy way)
   python -m udn_gateway.cli -a api-key.txt -u UDN287643 --download
   
   # Check for .gvcf.gz files
@@ -140,6 +143,8 @@ Examples:
                        help='Print participant info only (default behavior if --download is not specified)')
     parser.add_argument('--download', action='store_true', 
                        help='Download files for the participant (must be explicitly set)')
+    parser.add_argument('--all', action='store_true', 
+                       help='Download all available files for the participant (equivalent to --download without filters)')
     parser.add_argument('--gvcf', action='store_true', 
                        help='Check for .gvcf.gz files. Use with --download to download them.')
     parser.add_argument('--vcf', action='store_true', 
@@ -215,6 +220,17 @@ Examples:
     if args.info_only:
         logger.info('Info-only mode: not downloading any files.')
         return
+    
+    # Handle --all flag (download all files)
+    if args.all:
+        logger.info('Downloading all available files...')
+        downloaded_files = download_participant_files(client, udn_id, output_dir, args.file_types)
+        
+        if downloaded_files:
+            logger.info(f"Downloaded {len(downloaded_files)} files to {output_dir}")
+        else:
+            logger.warning("No files were downloaded")
+        return  # Exit after handling --all
     
     # Handle --gvcf flag (can work independently or with --download)
     if args.gvcf:
@@ -301,8 +317,8 @@ Examples:
             logger.warning("No files were downloaded")
     
     # If no action flags are set, warn and exit
-    if not args.download and not args.gvcf and not args.vcf:
-        logger.warning('No action taken. Use --download to download all files, --gvcf to check for .gvcf.gz files, --vcf to check for .vcf.gz files, or --info-only to print info.')
+    if not args.download and not args.gvcf and not args.vcf and not args.all:
+        logger.warning('No action taken. Use --all to download all files, --download to download all files, --gvcf to check for .gvcf.gz files, --vcf to check for .vcf.gz files, or --info-only to print info.')
 
 
 if __name__ == "__main__":

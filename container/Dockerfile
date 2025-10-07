@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
-COPY ../requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Production stage
@@ -33,12 +33,12 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /root/.local /root/.local
 
 # Copy the application
-COPY ../udn_gateway/ ./udn_gateway/
-COPY ../bin/udn_gateway_cli.py .
-COPY ../main.nf .
-COPY ../nextflow.config .
-COPY ../modules/ ./modules/
-COPY ../bin/ ./bin/
+COPY udn_gateway/ ./udn_gateway/
+COPY bin/udn_gateway_cli.py .
+COPY main.nf .
+COPY nextflow.config .
+COPY modules/ ./modules/
+COPY bin/ ./bin/
 
 # Create necessary directories
 RUN mkdir -p /app/results /app/logs /app/reports /app/work

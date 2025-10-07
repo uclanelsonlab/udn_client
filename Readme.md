@@ -29,6 +29,10 @@ udn_aws_to_dnanexus_copy/
 - **Complete API Coverage**: All UDN Gateway API endpoints are supported
 - **Enhanced Error Handling**: Comprehensive error handling with detailed error messages
 - **File Download Management**: Automated file downloading with progress tracking
+- **Nextflow Pipeline**: Scalable and reproducible pipeline for data processing
+- **Docker Container**: Pre-built container with all dependencies
+- **Container Support**: Docker and Singularity support for consistent execution
+- **Multiple Execution Profiles**: Local, SLURM, AWS Batch, and cloud execution
 - **Backward Compatibility**: Enhanced scripts maintain compatibility with existing workflows
 - **Command Line Interface**: Easy-to-use CLI for common operations
 - **Logging**: Detailed logging for debugging and monitoring
@@ -46,6 +50,42 @@ pip install .
 ```
 
 ### Option 2: Use Directly
+
+### Option 3: Docker Container (Recommended for Production)
+
+The repository includes a complete Docker setup for containerized execution:
+
+```bash
+# Build the Docker image
+./bin/build_docker.sh --build
+
+# Run with Docker
+docker run --rm -v $(pwd)/token.txt:/app/token.txt udn-gateway-client:latest \
+  python udn_gateway_cli.py -a token.txt -u UDN970218 --all
+
+# Use with Docker Compose
+cd container && docker-compose up -d
+cd container && docker-compose exec nextflow nextflow run main.nf --api_token_file token.txt --udn_id UDN970218
+```
+
+For detailed Docker usage, see [container/DOCKER.md](container/DOCKER.md).
+
+### Option 4: Nextflow Pipeline (Recommended for Production)
+
+The repository includes a complete Nextflow pipeline for scalable data processing:
+
+```bash
+# Install Nextflow (if not already installed)
+curl -s https://get.nextflow.io | bash
+
+# Run the pipeline
+./bin/run_pipeline.sh --api_token_file token.txt --udn_id UDN970218
+
+# Or run directly with Nextflow
+nextflow run main.nf --api_token_file token.txt --udn_id UDN970218
+```
+
+For detailed Nextflow usage, see [NEXTFLOW.md](NEXTFLOW.md).
 
 ## Testing
 
@@ -367,29 +407,50 @@ client = UDNGatewayClient("your_token")
 
 ## Nextflow Integration
 
-The enhanced script is compatible with the existing Nextflow workflow:
+This repository includes a complete Nextflow pipeline for scalable data processing. The pipeline provides:
+
+- **Modular Design**: Separate processes for downloading, processing, and reporting
+- **Multiple Execution Profiles**: Local, SLURM, AWS Batch, Docker, and Singularity
+- **Container Support**: Docker and Singularity containers for consistent execution
+- **Resource Management**: Configurable CPU, memory, and time limits
+- **Error Handling**: Retry logic and comprehensive error reporting
+- **Progress Tracking**: Detailed execution reports and timelines
+
+### Pipeline Usage
+
+```bash
+# Basic usage
+./bin/run_pipeline.sh --api_token_file token.txt --udn_id UDN970218
+
+# With specific options
+./bin/run_pipeline.sh --api_token_file token.txt --udn_id UDN970218 --download_vcf --profile slurm
+
+# Direct Nextflow execution
+nextflow run main.nf --api_token_file token.txt --udn_id UDN970218 -profile docker
+```
+
+### Integration with Existing Workflows
+
+The pipeline can be integrated into existing Nextflow workflows:
 
 ```groovy
-process bwa_mem {
-    container "gvcn/request_udn_files:v0.0.4"
-    cpus 12
-    tag "Download UDN gateway data for $udn_id"
+include { downloadParticipantData } from 'path/to/udn_client/modules/download_participant_data'
 
-    input:
-    val udn_id
-    val proband_id
-    val relative_status
-    path api_token_file
-
-    output:
-    tuple val(meta), path("*.bwa.bam"), emit: bwa_bam
-    
-    script:
-    """
-    python /home/bin/request_udn_files_enhanced.py -a ${api_token_file} -u ${udn_id}
-    """
+workflow {
+    downloadParticipantData(
+        api_token_file,
+        udn_id,
+        output_dirs,
+        download_all,
+        download_vcf,
+        download_gvcf,
+        file_types,
+        verbose
+    )
 }
 ```
+
+For complete documentation, see [NEXTFLOW.md](NEXTFLOW.md).
 
 ## Configuration
 
@@ -461,6 +522,13 @@ For issues related to:
 ### Version 2.1.0
 - Added `--all` parameter for simplified downloading of all available files
 - Enhanced CLI usability with more intuitive download options
+- Added complete Nextflow pipeline for scalable data processing
+- Added Docker container with pre-built dependencies
+- Added Docker Compose for local development and testing
+- Added Docker and Singularity container support
+- Added multiple execution profiles (local, SLURM, AWS Batch)
+- Added modular pipeline design with separate processes
+- Added comprehensive reporting and logging
 - Maintained backward compatibility with existing `--download` parameter
 
 ### Version 2.0.0

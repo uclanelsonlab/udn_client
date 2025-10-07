@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  udn-gateway-client:
+    build:
+      context: ..
+      dockerfile: container/Dockerfile
+    image: udn-gateway-client:latest
+    container_name: udn-gateway-client
+    volumes:
+      # Mount parent directory for development
+      - ..:/app
+      # Mount results directory
+      - ../results:/app/results
+      # Mount logs directory
+      - ../logs:/app/logs
+      # Mount reports directory
+      - ../reports:/app/reports
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    working_dir: /app
+    command: ["python", "udn_gateway_cli.py", "--help"]
+    networks:
+      - udn-network
+
+  # Development service for interactive use
+  udn-gateway-dev:
+    build:
+      context: ..
+      dockerfile: container/Dockerfile
+    image: udn-gateway-client:latest
+    container_name: udn-gateway-dev
+    volumes:
+      - ..:/app
+      - ../results:/app/results
+      - ../logs:/app/logs
+      - ../reports:/app/reports
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    working_dir: /app
+    command: ["bash"]
+    stdin_open: true
+    tty: true
+    networks:
+      - udn-network
+
+  # Nextflow service for pipeline execution
+  nextflow:
+    image: nextflow/nextflow:22.10.0
+    container_name: nextflow-udn
+    volumes:
+      - ..:/workspace
+      - ../results:/workspace/results
+      - ../logs:/workspace/logs
+      - ../reports:/workspace/reports
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /workspace
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    command: ["nextflow", "run", "main.nf", "--help"]
+    depends_on:
+      - udn-gateway-client
+    networks:
+      - udn-network
+
+networks:
+  udn-network:
+    driver: bridge
+
+volumes:
+  results:
+  logs:
+  reports:

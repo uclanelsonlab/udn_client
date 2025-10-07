@@ -18,7 +18,7 @@ def read_requirements():
 
 setup(
     name="udn-gateway-client",
-    version="2.0.0",
+    version="2.1.0",
     author="UDN Gateway API Client",
     author_email="",
     description="A comprehensive Python client for the UDN Gateway API",
